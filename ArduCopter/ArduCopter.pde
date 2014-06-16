@@ -1,6 +1,6 @@
 /// -*- tab-width: 4; Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#define THISFIRMWARE "ArduCopter V3.1.5"
+#define THISFIRMWARE "ArduCopter V3.1.5-ivy1.0"
 /*
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -898,7 +898,7 @@ void setup()
     // Load the default values of variables listed in var_info[]s
     AP_Param::setup_sketch_defaults();
 
-    init_ardupilot();
+    init_ardupilot();  
 
     // initialise the main loop scheduler
     scheduler.init(&scheduler_tasks[0], sizeof(scheduler_tasks)/sizeof(scheduler_tasks[0]));
