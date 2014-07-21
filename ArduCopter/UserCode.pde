@@ -7,6 +7,7 @@ void userhook_init()
     // this will be called once at start-up
 
     hal.uartC->begin(115200,64,64);
+    
     //hal.uartC->printf("logger initialize\n");
 }
 #endif
@@ -30,16 +31,21 @@ void userhook_MediumLoop()
 {
    // put your 10Hz code here
 
+
+
 	/*   
 	uint32_t gps_time    : g_gps->time_week_ms,
 	uint16_t gps_week    : g_gps->time_week,
 	int32_t latitude    : current_loc.lat,
 	int32_t longitude   : current_loc.lng,
 	int32_t altitude    : current_loc.alt,
-	int16_t roll        : (int16_t)ahrs.roll_sensor,
-	int16_t pitch       : (int16_t)ahrs.pitch_sensor,
-	uint16_t yaw         : (uint16_t)ahrs.yaw_sensor
+	int16_t roll        : (int16_t)ahrs.roll_sensor, unit degree*100
+	int16_t pitch       : (int16_t)ahrs.pitch_sensor,unit degree*100
+	uint16_t yaw         : (uint16_t)ahrs.yaw_sensor unit degree*100
 	*/
+
+
+    
 
 	hal.uartC->printf("$");
 

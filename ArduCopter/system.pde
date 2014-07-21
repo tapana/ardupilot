@@ -182,9 +182,14 @@ static void init_ardupilot()
 #if CONFIG_HAL_BOARD != HAL_BOARD_APM2
     // we have a 2nd serial port for telemetry on all boards except
     // APM2. We actually do have one on APM2 but it isn't necessary as
-    // a MUX is used
+    // a MUX is use
+    
+    /*ivy hack remove mavlink on uart2 for other used
     hal.uartC->begin(map_baudrate(g.serial1_baud, SERIAL1_BAUD), 128, 128);
     gcs[1].init(hal.uartC);
+    //ivy hack end*/
+
+
 #endif
 #if MAVLINK_COMM_NUM_BUFFERS > 2
     if (hal.uartD != NULL) {
