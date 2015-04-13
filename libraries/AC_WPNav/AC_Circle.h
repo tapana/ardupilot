@@ -41,13 +41,16 @@ public:
     void set_radius(float radius_cm) { _radius = radius_cm; }
 
     /// set_circle_rate - set circle rate in degrees per second
-    void set_rate(float deg_per_sec) { _rate = deg_per_sec; }
+    void set_rate(float deg_per_sec);
 
     /// get_angle_total - return total angle in radians that vehicle has circled
     float get_angle_total() const { return _angle_total; }
 
     /// update - update circle controller
     void update();
+    /// ivy - new update with variable rate
+    void update(float rate);
+
 
     /// get desired roll, pitch which should be fed into stabilize controllers
     int32_t get_roll() const { return _pos_control.get_roll(); }
@@ -99,5 +102,7 @@ private:
     float       _angular_vel;   // angular velocity in radians/sec
     float       _angular_vel_max;   // maximum velocity in radians/sec
     float       _angular_accel; // angular acceleration in radians/sec/sec
+
+    float _orbit_rate;
 };
 #endif	// AC_CIRCLE_H

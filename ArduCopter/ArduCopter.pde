@@ -898,6 +898,7 @@ void setup()
 {
     cliSerial = hal.console;
 
+
     // Load the default values of variables listed in var_info[]s
     AP_Param::setup_sketch_defaults();
 

@@ -23,6 +23,8 @@ static bool circle_init(bool ignore_checks)
     }else{
         return false;
     }
+
+    //cliSerial->printf("ivy: circle init");
 }
 
 // circle_run - runs the circle flight mode
@@ -31,6 +33,9 @@ static void circle_run()
 {
     float target_yaw_rate = 0;
     float target_climb_rate = 0;
+
+    //ivy hack
+    float target_orbit_rate = 0;
 
     // if not auto armed set throttle to zero and exit immediately
     if(!ap.auto_armed || ap.land_complete) {
@@ -48,7 +53,7 @@ static void circle_run()
         target_yaw_rate = get_pilot_desired_yaw_rate(g.rc_4.control_in);
         if (target_yaw_rate != 0) {
             circle_pilot_yaw_override = true;
-        }
+        }        
 
         // get pilot desired climb rate
         target_climb_rate = get_pilot_desired_climb_rate(g.rc_3.control_in);
@@ -60,10 +65,17 @@ static void circle_run()
             // clear i term when we're taking off
             set_throttle_takeoff();
         }
+
+        //ivy hack
+        target_orbit_rate = -g.rc_1.control_in * 0.01f;
+
     }
 
     // run circle controller
-    circle_nav.update();
+    //ivy hack
+    //circle_nav.update();    
+    // rate from joy stick
+    circle_nav.update(target_orbit_rate);
 
     // call attitude controller
     if (circle_pilot_yaw_override) {

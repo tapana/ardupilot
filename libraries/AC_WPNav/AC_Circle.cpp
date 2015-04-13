@@ -59,7 +59,9 @@ void AC_Circle::init(const Vector3f& center)
     _pos_control.set_target_to_stopping_point_z();
 
     // calculate velocities
-    calc_velocities();
+
+    
+    calc_velocities();    
 
     // set start angle from position
     init_start_angle(false);
@@ -89,6 +91,9 @@ void AC_Circle::init()
 
     // set starting angle from vehicle heading
     init_start_angle(true);
+
+    
+
 }
 
 /// update - update circle controller
@@ -121,6 +126,7 @@ void AC_Circle::update()
             }
         }
 
+       //hal.console->printf("r %f %f %f\n",_rate,_angular_vel,_angular_vel_max);
         // update the target angle and total angle traveled
         float angle_change = _angular_vel * dt;
         _angle += angle_change;
@@ -161,6 +167,72 @@ void AC_Circle::update()
     // run loiter's position to velocity step
     _pos_control.update_xy_controller(false);
 }
+
+
+void AC_Circle::update(float u_rate)
+{
+
+    uint32_t now = hal.scheduler->millis();
+    float dt = (now - _last_update) / 1000.0f;
+
+    // update circle position at 10hz
+    if (dt > 0.095f) {
+
+        // double check dt is reasonable
+        if (dt >= 1.0f) {
+            dt = 0.0;
+        }
+        // capture time since last iteration
+        _last_update = now;
+
+         _angle = wrap_PI(_ahrs.yaw-PI);
+        // calculate max velocity based on waypoint speed ensuring we do not use more than half our max acceleration for accelerating towards the center of the circle
+        float velocity_max = min(_pos_control.get_speed_xy(), safe_sqrt(0.5f*_pos_control.get_accel_xy()*_radius));
+
+        // angular_velocity in radians per second
+        _angular_vel_max = velocity_max/_radius;
+        _angular_vel = constrain_float(ToRad(u_rate),-_angular_vel_max,_angular_vel_max);
+
+
+      //  hal.console->printf("r %f %f %f\n",u_rate,_angular_vel,_angular_vel_max);
+        // update the target angle and total angle traveled
+        float angle_change = _angular_vel * dt;
+        _angle += angle_change;
+        _angle = wrap_PI(_angle);
+        _angle_total += angle_change;
+
+    
+        // calculate target position
+        Vector3f target;
+        target.x = _center.x + _radius * cosf(-_angle);
+        target.y = _center.y - _radius * sinf(-_angle);
+        target.z = _pos_control.get_alt_target();
+
+        // update position controller target
+        _pos_control.set_pos_target(target);
+
+        // heading is 180 deg from vehicles target position around circle
+        _yaw = wrap_PI(_angle-PI) * AC_CIRCLE_DEGX100;
+       
+
+        // trigger position controller on next update
+        _pos_control.trigger_xy();
+    }
+
+    // run loiter's position to velocity step
+    _pos_control.update_xy_controller(false);
+
+
+}
+
+
+
+void AC_Circle::set_rate(float deg_per_sec) {
+
+        //hal.console->printf("set rate %f \n",deg_per_sec);
+        hal.console->printf("set rate %f\n",deg_per_sec);
+        _rate = deg_per_sec; 
+    }
 
 // get_closest_point_on_circle - returns closest point on the circle
 //  circle's center should already have been set
