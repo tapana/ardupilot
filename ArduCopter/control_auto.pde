@@ -406,7 +406,7 @@ void auto_circle_run()
         target_climb_rate = get_pilot_desired_climb_rate(g.rc_3.control_in);
     
         //ivy hack
-        target_orbit_rate = -g.rc_1.control_in * 0.01f;
+        target_orbit_rate = -g.rc_1.control_in * 0.002f;
     }
 
     // run circle controller

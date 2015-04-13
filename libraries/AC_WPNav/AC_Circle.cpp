@@ -128,8 +128,8 @@ void AC_Circle::update()
         }
 
        
-        hal.console->printf("r %f %f %f %f ll %f %f \n",_rate,ToRad(_rate),_angular_vel,_angular_vel_max
-            , _pos_control.get_roll() , _pos_control.get_pitch());
+       // hal.console->printf("r %f %f %f %f ll %f %f \n",_rate,ToRad(_rate),_angular_vel,_angular_vel_max
+        //    , _pos_control.get_roll() , _pos_control.get_pitch());
         // update the target angle and total angle traveled
         float angle_change = _angular_vel * dt;
         _angle += angle_change;
@@ -194,8 +194,8 @@ void AC_Circle::update(float u_rate)
         // angular_velocity in radians per second        
         _angular_vel = constrain_float(ToRad(u_rate),-_orbit_rate_max,_orbit_rate_max);
         
-        hal.console->printf("r %f %f %f %f ll %f %f \n",_rate,ToRad(_rate),_angular_vel,_angular_vel_max
-            , _pos_control.get_roll() , _pos_control.get_pitch());
+       // hal.console->printf("r %f %f %f %f ll %f %f \n",u_rate,ToRad(u_rate),_angular_vel,_angular_vel_max
+        //    , _pos_control.get_roll() , _pos_control.get_pitch());
         // update the target angle and total angle traveled
         float angle_change = _angular_vel * dt;
         _angle += angle_change;
@@ -231,7 +231,7 @@ void AC_Circle::update(float u_rate)
 void AC_Circle::set_rate(float deg_per_sec) {
 
         //hal.console->printf("set rate %f \n",deg_per_sec);
-        hal.console->printf("set rate %f\n",deg_per_sec);
+    //    hal.console->printf("set rate %f\n",deg_per_sec);
         _rate = deg_per_sec; 
     }
 
