@@ -380,6 +380,8 @@ static void auto_circle_start()
 //      called by auto_run at 100hz or more
 void auto_circle_run()
 {
+    
+/* previous auto 
     // call circle controller
     circle_nav.update();
 
@@ -388,6 +390,40 @@ void auto_circle_run()
 
     // roll & pitch from waypoint controller, yaw rate from pilot
     attitude_control.angle_ef_roll_pitch_yaw(circle_nav.get_roll(), circle_nav.get_pitch(), circle_nav.get_yaw(),true);
+    return;
+
+//*/
+
+
+    float target_climb_rate = 0;
+    //ivy hack
+    float target_orbit_rate = 0;
+
+    // process pilot inputs
+    if (!failsafe.radio) {
+       
+        // get pilot desired climb rate
+        target_climb_rate = get_pilot_desired_climb_rate(g.rc_3.control_in);
+    
+        //ivy hack
+        target_orbit_rate = -g.rc_1.control_in * 0.01f;
+    }
+
+    // run circle controller
+    //ivy hack
+    //circle_nav.update();    
+    // rate from joy stick
+    circle_nav.update(target_orbit_rate);
+
+    // call attitude controller
+       
+    attitude_control.angle_ef_roll_pitch_yaw(circle_nav.get_roll(), circle_nav.get_pitch(), circle_nav.get_yaw(),true);
+
+
+
+    // update altitude target and call position controller
+    pos_control.set_alt_target_from_climb_rate(target_climb_rate, G_Dt);
+    pos_control.update_z_controller();
 }
 
 #if NAV_GUIDED == ENABLED

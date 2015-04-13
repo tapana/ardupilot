@@ -60,11 +60,12 @@ void AC_Circle::init(const Vector3f& center)
 
     // calculate velocities
 
-    
+
     calc_velocities();    
 
     // set start angle from position
     init_start_angle(false);
+    _orbit_rate_max = min(_pos_control.get_speed_xy(), safe_sqrt(0.5f*_pos_control.get_accel_xy()*_radius))/ _radius;
 }
 
 /// init - initialise circle controller setting center using stopping point and projecting out based on the copter's heading
@@ -92,7 +93,7 @@ void AC_Circle::init()
     // set starting angle from vehicle heading
     init_start_angle(true);
 
-    
+    _orbit_rate_max = min(_pos_control.get_speed_xy(), safe_sqrt(0.5f*_pos_control.get_accel_xy()*_radius))/ _radius;
 
 }
 
@@ -126,7 +127,9 @@ void AC_Circle::update()
             }
         }
 
-       //hal.console->printf("r %f %f %f\n",_rate,_angular_vel,_angular_vel_max);
+       
+        hal.console->printf("r %f %f %f %f ll %f %f \n",_rate,ToRad(_rate),_angular_vel,_angular_vel_max
+            , _pos_control.get_roll() , _pos_control.get_pitch());
         // update the target angle and total angle traveled
         float angle_change = _angular_vel * dt;
         _angle += angle_change;
@@ -162,6 +165,9 @@ void AC_Circle::update()
 
         // trigger position controller on next update
         _pos_control.trigger_xy();
+
+
+        
     }
 
     // run loiter's position to velocity step
@@ -184,17 +190,12 @@ void AC_Circle::update(float u_rate)
         }
         // capture time since last iteration
         _last_update = now;
-
-         _angle = wrap_PI(_ahrs.yaw-PI);
-        // calculate max velocity based on waypoint speed ensuring we do not use more than half our max acceleration for accelerating towards the center of the circle
-        float velocity_max = min(_pos_control.get_speed_xy(), safe_sqrt(0.5f*_pos_control.get_accel_xy()*_radius));
-
-        // angular_velocity in radians per second
-        _angular_vel_max = velocity_max/_radius;
-        _angular_vel = constrain_float(ToRad(u_rate),-_angular_vel_max,_angular_vel_max);
-
-
-      //  hal.console->printf("r %f %f %f\n",u_rate,_angular_vel,_angular_vel_max);
+        
+        // angular_velocity in radians per second        
+        _angular_vel = constrain_float(ToRad(u_rate),-_orbit_rate_max,_orbit_rate_max);
+        
+        hal.console->printf("r %f %f %f %f ll %f %f \n",_rate,ToRad(_rate),_angular_vel,_angular_vel_max
+            , _pos_control.get_roll() , _pos_control.get_pitch());
         // update the target angle and total angle traveled
         float angle_change = _angular_vel * dt;
         _angle += angle_change;

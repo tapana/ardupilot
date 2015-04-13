@@ -103,6 +103,7 @@ private:
     float       _angular_vel_max;   // maximum velocity in radians/sec
     float       _angular_accel; // angular acceleration in radians/sec/sec
 
-    float _orbit_rate;
+
+    float _orbit_rate_max;
 };
 #endif	// AC_CIRCLE_H
