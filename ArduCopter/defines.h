@@ -204,6 +204,7 @@ enum GuidedMode {
 // RTL states
 enum RTLState {
     InitialClimb,
+    OrbitMoveToEdge,
     OrbitSave,
     ReturnHome,
     LoiterAtHome,

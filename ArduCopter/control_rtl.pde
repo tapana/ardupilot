@@ -26,8 +26,12 @@ static void rtl_run()
     if (rtl_state_complete) {
         switch (rtl_state) {
         case InitialClimb:
+            rtl_orbit_movetoedge_start();
+            break;
+        case OrbitMoveToEdge:
             rtl_orbit_start();
             break;
+
         case OrbitSave:
             rtl_return_start();
             break;            
@@ -50,7 +54,7 @@ static void rtl_run()
             break;
         }
 
-        hal.console->printf("rtl state %d\n",rtl_state);
+       // hal.console->printf("rtl state %d\n",rtl_state);
     }
 
     // call the correct run function
@@ -58,6 +62,11 @@ static void rtl_run()
 
     case InitialClimb:
         rtl_climb_return_run();
+        break;
+
+
+    case OrbitMoveToEdge:
+        rtl_climb_return_run();        
         break;
 
     case OrbitSave:
@@ -179,25 +188,55 @@ static void rtl_climb_return_run()
     rtl_state_complete = wp_nav.reached_wp_destination();
 }
 
+static void rtl_orbit_movetoedge_start(){
+
+   // hal.console->printf("rtl orbit move to edge\n");
+    rtl_state = OrbitMoveToEdge;
+    rtl_state_complete = false;  
+
+    if(auto_mode == Auto_Circle || auto_mode == Auto_CircleMoveToEdge){
+     //   hal.console->printf("circle mode edge \n");
+        rtl_state_complete = false;        
+        
+        Vector3f circle_edge;
+        circle_nav.get_closest_point_on_circle(circle_edge);
+        circle_edge.z = get_RTL_alt();        
+    
+        // initialise wpnav to move to edge of circle
+        wp_nav.set_wp_destination(circle_edge);
+        set_auto_yaw_mode(AUTO_YAW_HOLD);
+
+    }else{
+        //skip to next state
+    //    hal.console->printf("orbit skip\n");
+        
+        Vector3f destination;
+        wp_nav.get_wp_stopping_point_xy(destination);
+        destination.z = get_RTL_alt();
+        wp_nav.set_wp_destination(destination);        
+    }
+
+}
+
 static float rtl_orbit_exit_angle = 0;
 static void rtl_orbit_start(){
 
-    hal.console->printf("rtl orbit start\n");
+    //hal.console->printf("rtl orbit start\n");
     rtl_state = OrbitSave;
     
-    if(auto_mode == Auto_Circle){
-        hal.console->printf("circle mode detect\n");
+    if(auto_mode == Auto_Circle || auto_mode == Auto_CircleMoveToEdge){
+      //  hal.console->printf("circle mode detect\n");
         rtl_state_complete = false;        
-
+        circle_nav.init(circle_nav.get_center());
         //set exit point
         //goal angle
         Vector3f home = Vector3f(0,0,get_RTL_alt());
         float gang = pv_get_bearing_cd( circle_nav.get_center(), home);
         rtl_orbit_exit_angle = ToRad(gang/100);
-        hal.console->printf("home %f \n",gang, rtl_orbit_exit_angle );
+        //hal.console->printf("home %f \n",gang, rtl_orbit_exit_angle );
     }else{
         //skip to next state
-        hal.console->printf("orbit skip\n");
+        //hal.console->printf("orbit skip\n");
         rtl_state_complete = true;        
     }
 
@@ -218,7 +257,6 @@ static void rtl_orbit_run(){
         rtl_state_complete = true;
     }
 
-//*
     //orbit speed degree per sec
     float orbit_speed = remain_angle*10.0f;
     orbit_speed = constrain_float(orbit_speed,-20.0f,20.0f);
@@ -229,15 +267,6 @@ static void rtl_orbit_run(){
     attitude_control.angle_ef_roll_pitch_yaw(circle_nav.get_roll(), circle_nav.get_pitch(), circle_nav.get_yaw(),true);
 
     pos_control.update_z_controller();
-    
-    static int c =0;
-    if(c++ > 20){
-        c =0;
-        hal.console->printf("remain angle %f\n",remain_angle );
-    }
-  //*/
-
-    //rtl_state_complete = false;
 
 }
 
