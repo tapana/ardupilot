@@ -26,8 +26,12 @@ static void rtl_run()
     if (rtl_state_complete) {
         switch (rtl_state) {
         case InitialClimb:
-            rtl_return_start();
+            rtl_orbit_start();
             break;
+        case OrbitSave:
+            rtl_return_start();
+            break;            
+
         case ReturnHome:
             rtl_loiterathome_start();
             break;
@@ -45,6 +49,8 @@ static void rtl_run()
             // do nothing - rtl_land_run will take care of disarming motors
             break;
         }
+
+        hal.console->printf("rtl state %d\n",rtl_state);
     }
 
     // call the correct run function
@@ -52,6 +58,10 @@ static void rtl_run()
 
     case InitialClimb:
         rtl_climb_return_run();
+        break;
+
+    case OrbitSave:
+        rtl_orbit_run();
         break;
 
     case ReturnHome:
@@ -168,6 +178,69 @@ static void rtl_climb_return_run()
     // check if we've completed this stage of RTL
     rtl_state_complete = wp_nav.reached_wp_destination();
 }
+
+static float rtl_orbit_exit_angle = 0;
+static void rtl_orbit_start(){
+
+    hal.console->printf("rtl orbit start\n");
+    rtl_state = OrbitSave;
+    
+    if(auto_mode == Auto_Circle){
+        hal.console->printf("circle mode detect\n");
+        rtl_state_complete = false;        
+
+        //set exit point
+        //goal angle
+        Vector3f home = Vector3f(0,0,get_RTL_alt());
+        float gang = pv_get_bearing_cd( circle_nav.get_center(), home);
+        rtl_orbit_exit_angle = ToRad(gang/100);
+        hal.console->printf("home %f \n",gang, rtl_orbit_exit_angle );
+    }else{
+        //skip to next state
+        hal.console->printf("orbit skip\n");
+        rtl_state_complete = true;        
+    }
+
+    //check if we have to do orbit save
+}
+
+
+static void rtl_orbit_run(){
+
+    //skip if not in orbit mode
+    if(rtl_state_complete)return;
+
+    //remain_angle to exit point nearest to home uint in radian
+    float remain_angle = wrap_PI(rtl_orbit_exit_angle - circle_nav.get_angle());
+    
+    //around +- 10 deg
+    if(fabs(remain_angle) < 0.175){
+        rtl_state_complete = true;
+    }
+
+//*
+    //orbit speed degree per sec
+    float orbit_speed = remain_angle*10.0f;
+    orbit_speed = constrain_float(orbit_speed,-20.0f,20.0f);
+    //fly to exit point
+    circle_nav.update(orbit_speed);
+
+    // call attitude controller       
+    attitude_control.angle_ef_roll_pitch_yaw(circle_nav.get_roll(), circle_nav.get_pitch(), circle_nav.get_yaw(),true);
+
+    pos_control.update_z_controller();
+    
+    static int c =0;
+    if(c++ > 20){
+        c =0;
+        hal.console->printf("remain angle %f\n",remain_angle );
+    }
+  //*/
+
+    //rtl_state_complete = false;
+
+}
+
 
 // rtl_return_start - initialise return to home
 static void rtl_loiterathome_start()

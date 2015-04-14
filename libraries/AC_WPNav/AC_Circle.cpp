@@ -202,7 +202,8 @@ void AC_Circle::update(float u_rate)
         _angle = wrap_PI(_angle);
         _angle_total += angle_change;
 
-    
+      //  hal.console->printf("angle %f\n",_angle);
+
         // calculate target position
         Vector3f target;
         target.x = _center.x + _radius * cosf(-_angle);
@@ -226,14 +227,6 @@ void AC_Circle::update(float u_rate)
 
 }
 
-
-
-void AC_Circle::set_rate(float deg_per_sec) {
-
-        //hal.console->printf("set rate %f \n",deg_per_sec);
-    //    hal.console->printf("set rate %f\n",deg_per_sec);
-        _rate = deg_per_sec; 
-    }
 
 // get_closest_point_on_circle - returns closest point on the circle
 //  circle's center should already have been set
@@ -270,6 +263,9 @@ void AC_Circle::get_closest_point_on_circle(Vector3f &result)
     result.y = _center.y + vec.y / dist * _radius;
     result.z = _center.z;
 }
+
+
+
 
 // calc_velocities - calculate angular velocity max and acceleration based on radius and rate
 //      this should be called whenever the radius or rate are changed

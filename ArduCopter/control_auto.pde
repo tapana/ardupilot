@@ -415,11 +415,8 @@ void auto_circle_run()
     // rate from joy stick
     circle_nav.update(target_orbit_rate);
 
-    // call attitude controller
-       
+    // call attitude controller       
     attitude_control.angle_ef_roll_pitch_yaw(circle_nav.get_roll(), circle_nav.get_pitch(), circle_nav.get_yaw(),true);
-
-
 
     // update altitude target and call position controller
     pos_control.set_alt_target_from_climb_rate(target_climb_rate, G_Dt);
