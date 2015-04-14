@@ -67,15 +67,15 @@ static void circle_run()
         }
 
         //ivy hack
-        target_orbit_rate = -g.rc_1.control_in * 0.01f;
+        target_orbit_rate = -g.rc_1.control_in * 0.002f;
 
     }
 
     // run circle controller
     //ivy hack
-    //circle_nav.update();    
+    circle_nav.update();    
     // rate from joy stick
-    circle_nav.update(target_orbit_rate);
+    //circle_nav.update(target_orbit_rate);
 
     // call attitude controller
     if (circle_pilot_yaw_override) {
